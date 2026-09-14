@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ficha de Treino</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: #15181A;
+    color: #ECE8DE;
+  }
+  .ficha-title { font-family: 'Oswald', sans-serif; letter-spacing: 0.01em; margin: 0; font-weight: 600; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 32px 20px 56px; }
+  .wrap-plano { max-width: 720px; }
+  h1 { font-size: 24px; }
+  .subtitle { margin: 0 0 26px; font-size: 13.5px; color: #9A9F92; max-width: 460px; }
+  .campo { margin-bottom: 22px; }
+  .campo-label { font-size: 13px; font-weight: 600; color: #ECE8DE; margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 8px 13px; border-radius: 7px; border: 1px solid #363D38;
+    background: #1E2321; color: #C9CDC2; font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+  .chip.ativo { border-color: var(--chip-cor, #E2A83B); background: var(--chip-cor-bg, #E2A83B22); color: var(--chip-cor, #E2A83B); }
+  .row3 { display: flex; gap: 10px; }
+  .input-num {
+    flex: 1; min-width: 0; background: #1E2321; color: #ECE8DE; border: 1px solid #363D38;
+    border-radius: 7px; padding: 10px 12px; font-size: 13.5px; font-family: 'Inter', sans-serif;
+  }
+  .imc-note { font-size: 12px; color: #8B9086; margin-top: 8px; }
+  .btn-gerar {
+    width: 100%; padding: 14px 0; border-radius: 8px; border: none;
+    background: #2A2E29; color: #666B61; font-weight: 700; font-size: 14.5px;
+    cursor: not-allowed; font-family: 'Inter', sans-serif; margin-top: 6px;
+  }
+  .btn-gerar.ok { background: #E2A83B; color: #15181A; cursor: pointer; }
+  .hint-missing { font-size: 12px; color: #8B9086; margin-top: 8px; text-align: center; }
+
+  .header-plano { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
+  .header-plano h1 { display: flex; align-items: center; gap: 10px; font-size: 26px; }
+  .header-plano p { margin: 6px 0 0; font-size: 13.5px; color: #9A9F92; }
+  .btn-voltar {
+    display: flex; align-items: center; gap: 6px; background: transparent; border: 1px solid #363D38;
+    color: #C9CDC2; border-radius: 7px; padding: 8px 12px; font-size: 12.5px; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+  .profile-strip {
+    display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 16px; background: #1E2321;
+    border: 1px solid #363D38; border-radius: 10px; margin-bottom: 20px;
+  }
+  .profile-strip span { font-size: 12px; color: #C9CDC2; background: #262B28; border: 1px solid #363D38; border-radius: 6px; padding: 5px 10px; }
+  .actions-row { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 18px; }
+  .btn-shuffle {
+    display: flex; align-items: center; gap: 7px; background: #262B28; border: 1px solid #363D38;
+    color: #ECE8DE; border-radius: 7px; padding: 8px 14px; font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+  .day-tabs { display: flex; gap: 4px; overflow-x: auto; }
+  .day-tab {
+    flex: 1 0 auto; padding: 10px 12px; font-size: 12.5px; font-weight: 600;
+    border: 1px solid #363D38; border-top-left-radius: 8px; border-top-right-radius: 8px;
+    background: #181B19; color: #8B9086; cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+  .day-tab.ativo { background: #1E2321; color: #E2A83B; }
+  .day-panel { background: #1E2321; border: 1px solid #363D38; border-radius: 0 10px 10px 10px; padding: 20px 18px 8px; }
+  .day-panel h2 { font-size: 19px; margin: 0 0 4px; }
+  .day-panel .day-sub { margin: 0 0 16px; font-size: 12.5px; color: #8B9086; }
+  .ex-row {
+    display: flex; align-items: center; gap: 12px; padding: 12px 4px;
+    border-bottom: 1px solid #262B28; cursor: pointer;
+  }
+  .ex-row:last-child { border-bottom: none; }
+  .ex-row.done { opacity: 0.5; }
+  .ex-check {
+    width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid #454B45;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .ex-row.done .ex-check { border-color: #E2A83B; background: #E2A83B; }
+  .ex-name { font-size: 14.5px; font-weight: 500; }
+  .ex-row.done .ex-name { text-decoration: line-through; }
+  .ex-tag { font-size: 10.5px; font-weight: 600; border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+  .ex-meta { font-size: 12px; color: #8B9086; margin-top: 2px; }
+  .footer-note { display: flex; gap: 9px; margin-top: 18px; align-items: flex-start; }
+  .footer-note p { font-size: 12px; color: #8B9086; margin: 0; line-height: 1.5; }
+  ::selection { background: #E2A83B55; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ---------------------------------------------------------------------------
+// Base de exercícios — treino em casa com equipamento improvisado:
+// mochila (carga), elástico de resistência, barra de porta, toalha, cadeira.
+// ---------------------------------------------------------------------------
+
+const LABEL = {
+  peito: "Peito", costas: "Costas", pernas: "Pernas", ombro: "Ombro",
+  biceps: "Bíceps", triceps: "Tríceps", core: "Core",
+  pernas_potencia: "Pernas", pernas_agilidade: "Pernas",
+};
+
+const COR = {
+  peito: "#E2A83B", costas: "#6C9A8B", pernas: "#B5763B", ombro: "#C97A5A",
+  biceps: "#7C9A6C", triceps: "#D6935A", core: "#8A8F6E",
+  pernas_potencia: "#B5763B", pernas_agilidade: "#B5763B",
+};
+
+const POOL = {
+  peito: [
+    { nome: "Flexão tradicional", equip: "Peso do corpo", tipo: "forca" },
+    { nome: "Flexão com mochila nas costas", equip: "Mochila", tipo: "forca" },
+    { nome: "Flexão declinada (pés elevados)", equip: "Cadeira", tipo: "forca" },
+    { nome: "Flexão diamante", equip: "Peso do corpo", tipo: "forca" },
+    { nome: "Supino deitado com elástico", equip: "Elástico", tipo: "forca" },
+    { nome: "Crucifixo com elástico", equip: "Elástico", tipo: "forca" },
+    { nome: "Flexão explosiva", equip: "Peso do corpo", tipo: "potencia" },
+    { nome: "Flexão arqueiro", equip: "Peso do corpo", tipo: "forca" },
+  ],
+  costas: [
+    { nome: "Barra fixa pronada", equip: "Barra fixa", tipo: "forca" },
+    { nome: "Barra fixa supinada", equip: "Barra fixa", tipo: "forca" },
+    { nome: "Remada australiana na barra baixa", equip: "Barra fixa", tipo: "forca" },
+    { nome: "Remada curvada com mochila", equip: "Mochila", tipo: "forca" },
+    { nome: "Remada em pé com elástico", equip: "Elástico", tipo: "forca" },
+    { nome: "Puxada para trás com elástico", equip: "Elástico", tipo: "forca" },
+    { nome: "Dead hang (suspensão ativa)", equip: "Barra fixa", tipo: "isometria" },
+    { nome: "Superman isométrico", equip: "Peso do corpo", tipo: "isometria" },
+    { nome: "Retração escapular isométrica", equip: "Peso do corpo", tipo: "isometria" },
+  ],
+  pernas: [
+    { nome: "Agachamento com mochila", equip: "Mochila", tipo: "forca" },
+    { nome: "Afundo búlgaro (pé na cadeira)", equip: "Cadeira", tipo: "forca" },
+    { nome: "Step-up na cadeira", equip: "Cadeira", tipo: "forca" },
+    { nome: "Elevação de panturrilha", equip: "Peso do corpo", tipo: "forca" },
+    { nome: "Ponte de glúteo unilateral", equip: "Peso do corpo", tipo: "forca" },
+    { nome: "Agachamento isométrico na parede", equip: "Peso do corpo", tipo: "isometria" },
+  ],
+  pernas_potencia: [
+    { nome: "Agachamento com salto", equip: "Peso do corpo", tipo: "potencia" },
+    { nome: "Afundo com salto alternado", equip: "Peso do corpo", tipo: "potencia" },
+    { nome: "Saltos laterais (skater hops)", equip: "Peso do corpo", tipo: "potencia" },
+    { nome: "Salto unilateral em distância", equip: "Peso do corpo", tipo: "potencia" },
+    { nome: "Arrancada explosiva curta", equip: "Peso do corpo", tipo: "potencia" },
+  ],
+  pernas_agilidade: [
+    { nome: "Deslocamento lateral agachado", equip: "Peso do corpo", tipo: "cardio" },
+    { nome: "Corrida estacionária rápida (skip alto)", equip: "Peso do corpo", tipo: "cardio" },
+    { nome: "Mudança de direção (5-10-5)", equip: "Peso do corpo", tipo: "cardio" },
+    { nome: "Passadas rápidas com toque no chão", equip: "Peso do corpo", tipo: "cardio" },
+    { nome: "Deslizamento lateral com toalha", equip: "Toalha", tipo: "cardio" },
+  ],
+  ombro: [
+    { nome: "Desenvolvimento com mochila", equip: "Mochila", tipo: "forca" },
+    { nome: "Elevação lateral com elástico", equip: "Elástico", tipo: "forca" },
+    { nome: "Elevação frontal com mochila", equip: "Mochila", tipo: "forca" },
+    { nome: "Remada alta com elástico", equip: "Elástico", tipo: "forca" },
+  ],
+  biceps: [
+    { nome: "Rosca direta com elástico", equip: "Elástico", tipo: "forca" },
+    { nome: "Rosca martelo com mochila", equip: "Mochila", tipo: "forca" },
+    { nome: "Rosca 21 com elástico", equip: "Elástico", tipo: "forca" },
+  ],
+  triceps: [
+    { nome: "Mergulho na cadeira (dips)", equip: "Cadeira", tipo: "forca" },
+    { nome: "Tríceps testa com elástico", equip: "Elástico", tipo: "forca" },
+    { nome: "Tríceps coice com mochila", equip: "Mochila", tipo: "forca" },
+  ],
+  core: [
+    { nome: "Prancha frontal", equip: "Peso do corpo", tipo: "isometria" },
+    { nome: "Mountain climber deslizante", equip: "Toalha", tipo: "cardio" },
+    { nome: "Abdominal bicicleta", equip: "Peso do corpo", tipo: "forca" },
+    { nome: "Prancha lateral", equip: "Peso do corpo", tipo: "isometria" },
+    { nome: "Deslizamento de corpo todo com toalha", equip: "Toalha", tipo: "cardio" },
+  ],
+};
+
+const SCHEME = {
+  forca: {
+    hipertrofia: { series: 4, reps: "8-12", descanso: "60s" },
+    forca: { series: 5, reps: "4-6", descanso: "120s" },
+    emagrecimento: { series: 3, reps: "15-20", descanso: "30s" },
+    resistencia: { series: 3, reps: "20-25", descanso: "25s" },
+    esportivo: { series: 4, reps: "6-10", descanso: "75s" },
+  },
+  potencia: {
+    hipertrofia: { series: 3, reps: "10-12", descanso: "60s" },
+    forca: { series: 4, reps: "5-6", descanso: "90s" },
+    emagrecimento: { series: 3, reps: "12-15", descanso: "30s" },
+    resistencia: { series: 3, reps: "15-20", descanso: "30s" },
+    esportivo: { series: 4, reps: "6-8 (máx. explosão)", descanso: "90s" },
+  },
+  isometria: {
+    hipertrofia: { series: 3, reps: "40-60s", descanso: "45s" },
+    forca: { series: 3, reps: "45-60s (c/ carga)", descanso: "45s" },
+    emagrecimento: { series: 3, reps: "30-45s", descanso: "25s" },
+    resistencia: { series: 3, reps: "45-60s", descanso: "30s" },
+    esportivo: { series: 3, reps: "30-45s", descanso: "40s" },
+  },
+  cardio: {
+    hipertrofia: { series: 3, reps: "20-30s", descanso: "40s" },
+    forca: { series: 3, reps: "15-20s", descanso: "50s" },
+    emagrecimento: { series: 4, reps: "30-40s", descanso: "20s" },
+    resistencia: { series: 4, reps: "40-60s", descanso: "20s" },
+    esportivo: { series: 4, reps: "20-30s (máx. velocidade)", descanso: "45s" },
+  },
+};
+
+const RESTRICOES = {
+  Joelho: { gruposTipo: ["pernas_potencia", "pernas_agilidade"], nomes: ["Afundo búlgaro (pé na cadeira)", "Step-up na cadeira"] },
+  Tornozelo: { gruposTipo: ["pernas_potencia", "pernas_agilidade"] },
+  Ombro: { gruposExcluidos: ["ombro"], nomes: ["Mergulho na cadeira (dips)", "Flexão explosiva", "Desenvolvimento com mochila"] },
+  Lombar: { nomes: ["Superman isométrico"] },
+  Punho: { nomes: ["Flexão diamante", "Flexão explosiva"] },
+};
+
+function isRestrito(ex, grupo, limitacoes) {
+  return limitacoes.some((lim) => {
+    const r = RESTRICOES[lim];
+    if (!r) return false;
+    if (r.gruposExcluidos && r.gruposExcluidos.includes(grupo)) return true;
+    if (r.gruposTipo && r.gruposTipo.includes(grupo)) return true;
+    if (r.nomes && r.nomes.includes(ex.nome)) return true;
+    return false;
+  });
+}
+
+function shuffle(arr, seed) {
+  const a = [...arr];
+  let s = seed;
+  for (let i = a.length - 1; i > 0; i--) {
+    s = (s * 9301 + 49297) % 233280;
+    const j = Math.floor((s / 233280) * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function accessoryFor(g) {
+  return { peito: "triceps", costas: "biceps", pernas: "core", ombro: "triceps" }[g] || "core";
+}
+
+function buildTemplatesPadrao(freq, prioridades) {
+  const ALL = ["peito", "costas", "pernas", "ombro"];
+  const outros = ALL.filter((g) => !prioridades.includes(g));
+  const [p1, p2] = prioridades;
+  const [o1, o2] = outros;
+  const mkP = (g, variacao) => ({
+    titulo: `${LABEL[g]} & ${LABEL[accessoryFor(g)]}${variacao ? " (variação)" : ""}`,
+    blocos: [[g, 3], [accessoryFor(g), 2]],
+  });
+  const mkO = (g) => ({ titulo: `${LABEL[g]} & Core`, blocos: [[g, 3], ["core", 2]] });
+  const mkOutrosCombined = () => ({
+    titulo: `${LABEL[o1]}, ${LABEL[o2]} & Core`,
+    blocos: [[o1, 2], [o2, 2], ["core", 2]],
+  });
+  switch (freq) {
+    case 3: return [mkP(p1, false), mkP(p2, false), mkOutrosCombined()];
+    case 4: return [mkP(p1, false), mkP(p2, false), mkO(o1), mkO(o2)];
+    case 5: return [mkP(p1, false), mkP(p2, false), mkOutrosCombined(), mkP(p1, true), mkP(p2, true)];
+    case 6: return [mkP(p1, false), mkP(p2, false), mkO(o1), mkO(o2), mkP(p1, true), mkP(p2, true)];
+    default: return [];
+  }
+}
+
+function buildTemplatesEsportivo(freq) {
+  const master = [
+    { titulo: "Pernas — Potência", blocos: [["pernas_potencia", 3], ["core", 2]] },
+    { titulo: "Superior — Manutenção", blocos: [["peito", 2], ["costas", 2]] },
+    { titulo: "Pernas — Resistência & Agilidade", blocos: [["pernas_agilidade", 3], ["core", 2]] },
+    { titulo: "Core & Estabilidade", blocos: [["core", 4], ["ombro", 2]] },
+    { titulo: "Full Body — Explosão", blocos: [["peito", 1], ["costas", 1], ["pernas_potencia", 2], ["core", 1]] },
+    { titulo: "Pernas & Core — Complementar", blocos: [["pernas", 2], ["core", 3]] },
+  ];
+  return master.slice(0, freq);
+}
+
+function getScheme(tipo, objetivo) {
+  return (SCHEME[tipo] && SCHEME[tipo][objetivo]) || SCHEME[tipo].hipertrofia;
+}
+
+function gerarExercicios(blocos, seed, equipamento, limitacoes, objetivo) {
+  const exercicios = [];
+  blocos.forEach(([grupo, qtd], bi) => {
+    let pool = (POOL[grupo] || []).filter((ex) => !isRestrito(ex, grupo, limitacoes));
+    let filtrados = pool.filter((ex) => ex.equip === "Peso do corpo" || equipamento.includes(ex.equip));
+    if (filtrados.length < qtd) filtrados = pool;
+    const escolhidos = shuffle(filtrados, seed + bi * 13).slice(0, qtd);
+    escolhidos.forEach((ex) => {
+      const sch = getScheme(ex.tipo, objetivo);
+      exercicios.push(Object.assign({}, ex, { grupo }, sch));
+    });
+  });
+  return exercicios;
+}
+
+function montarFicha(state, seed) {
+  const { freq, objetivo, prioridades, equipamento, limitacoes } = state;
+  const templates = objetivo === "esportivo" ? buildTemplatesEsportivo(freq) : buildTemplatesPadrao(freq, prioridades);
+  return templates.map((dia, di) => Object.assign({}, dia, {
+    exercicios: gerarExercicios(dia.blocos, seed + di * 17, equipamento, limitacoes, objetivo),
+  }));
+}
+
+const DIA_LABELS = {
+  3: ["Seg", "Qua", "Sex"],
+  4: ["Seg", "Ter", "Qui", "Sex"],
+  5: ["Seg", "Ter", "Qua", "Qui", "Sex"],
+  6: ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
+};
+
+const OBJETIVOS = [
+  { v: "hipertrofia", l: "Hipertrofia (ganho de massa)" },
+  { v: "emagrecimento", l: "Emagrecimento / condicionamento" },
+  { v: "forca", l: "Força" },
+  { v: "esportivo", l: "Performance esportiva" },
+  { v: "resistencia", l: "Resistência geral" },
+];
+
+const ESPORTES = ["Futebol", "Corrida", "Basquete", "Vôlei", "Outro"];
+const LIMITACOES_OPCOES = ["Nenhuma", "Joelho", "Ombro", "Lombar", "Punho", "Tornozelo"];
+const EQUIP_OPCOES = ["Mochila", "Elástico", "Barra fixa", "Cadeira", "Toalha"];
+const PRIORIDADE_OPCOES = ["peito", "costas", "pernas", "ombro"];
+const NIVEL_OPCOES = ["Iniciante (até 6 meses)", "Intermediário (6 meses a 2 anos)", "Avançado (2+ anos)"];
+
+function calcIMC(peso, altura) {
+  const alturaM = altura / 100;
+  if (!peso || !alturaM) return null;
+  const imc = peso / (alturaM * alturaM);
+  let cat = "Peso normal";
+  if (imc < 18.5) cat = "Abaixo do peso";
+  else if (imc >= 25 && imc < 30) cat = "Sobrepeso";
+  else if (imc >= 30) cat = "Obesidade";
+  return { valor: imc.toFixed(1), cat };
+}
+
+// ---------------------------------------------------------------------------
+// Estado da aplicação
+// ---------------------------------------------------------------------------
+
+const state = {
+  step: "form",
+  idade: "", peso: "", altura: "", nivel: "",
+  freq: 5,
+  limitacoes: [], equipamento: [],
+  objetivo: "", esporte: "", prioridades: [],
+  seed: 1, diaAtivo: 0, feitos: {},
+};
+
+function canGenerate() {
+  const infoBasicaOk = state.idade && state.peso && state.altura && state.nivel;
+  const objetivoOk = state.objetivo === "esportivo" ? !!state.esporte : state.prioridades.length === 2;
+  return !!(infoBasicaOk && state.objetivo && objetivoOk);
+}
+
+function icon(name, size, color) {
+  const s = size || 16;
+  const c = color || "currentColor";
+  const icons = {
+    dumbbell: `<path d="M14.4 14.4 9.6 9.6M18.657 21.485a2 2 0 1 1-2.829-2.828l1.767-1.767a2 2 0 1 1 2.829 2.828zM2.343 2.515a2 2 0 1 1 2.829 2.828L3.404 7.11a2 2 0 1 1-2.829-2.828zM6.545 6.545l3.183-3.183 4.243 4.243-3.183 3.183zM11 11.293l3.183-3.183 4.243 4.243-3.183 3.183z"/>`,
+    clipboard: `<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>`,
+    shuffle: `<path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.8-1.1 2-1.7 3.3-1.7H22M18 2l4 4-4 4M2 6h1.4c1.3 0 2.5.6 3.3 1.7l.8 1.1M18 22l4-4-4-4"/>`,
+    check: `<path d="M20 6 9 17l-5-5"/>`,
+    info: `<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>`,
+    back: `<path d="M19 12H5M12 19l-7-7 7-7"/>`,
+  };
+  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icons[name] || ""}</svg>`;
+}
+
+function chip(label, ativo, cor) {
+  const style = ativo ? `style="--chip-cor:${cor || "#E2A83B"};--chip-cor-bg:${(cor || "#E2A83B")}22"` : "";
+  return `<button class="chip ${ativo ? "ativo" : ""}" ${style} data-label="${label}">${label}</button>`;
+}
+
+function renderForm() {
+  const imc = calcIMC(Number(state.peso), Number(state.altura));
+  const ok = canGenerate();
+
+  return `
+    <div class="wrap">
+      <h1 class="ficha-title" style="display:flex;align-items:center;gap:10px;">${icon("clipboard", 22, "#E2A83B")} Avaliação física</h1>
+      <p class="subtitle">Preencha suas informações e objetivo. A ficha é montada em cima disso — nada de treino genérico.</p>
+
+      <div class="campo">
+        <div class="campo-label">Idade, peso e altura</div>
+        <div class="row3">
+          <input class="input-num" type="number" id="in-idade" placeholder="Idade" value="${state.idade}">
+          <input class="input-num" type="number" id="in-peso" placeholder="Peso (kg)" value="${state.peso}">
+          <input class="input-num" type="number" id="in-altura" placeholder="Altura (cm)" value="${state.altura}">
+        </div>
+        ${imc ? `<div class="imc-note">IMC estimado: ${imc.valor} (${imc.cat}) — apenas referência, não substitui avaliação profissional.</div>` : ""}
+      </div>
+
+      <div class="campo">
+        <div class="campo-label">Nível de treino</div>
+        <div class="chips" id="grp-nivel">
+          ${NIVEL_OPCOES.map((n) => chip(n, state.nivel === n)).join("")}
+        </div>
+      </div>
+
+      <div class="campo">
+        <div class="campo-label">Dias disponíveis por semana</div>
+        <div class="chips" id="grp-freq">
+          ${[3, 4, 5, 6].map((n) => chip(n + "x", state.freq === n)).join("")}
+        </div>
+      </div>
+
+      <div class="campo">
+        <div class="campo-label">Limitações ou lesões</div>
+        <div class="chips" id="grp-limitacoes">
+          ${LIMITACOES_OPCOES.map((l) => chip(l, state.limitacoes.includes(l))).join("")}
+        </div>
+      </div>
+
+      <div class="campo">
+        <div class="campo-label">Equipamento disponível em casa (além do peso do corpo)</div>
+        <div class="chips" id="grp-equip">
+          ${EQUIP_OPCOES.map((eq) => chip(eq, state.equipamento.includes(eq))).join("")}
+        </div>
+      </div>
+
+      <div class="campo">
+        <div class="campo-label">Objetivo principal</div>
+        <div class="chips" id="grp-objetivo">
+          ${OBJETIVOS.map((o) => chip(o.l, state.objetivo === o.v)).join("")}
+        </div>
+      </div>
+
+      ${state.objetivo === "esportivo" ? `
+        <div class="campo">
+          <div class="campo-label">Qual esporte?</div>
+          <div class="chips" id="grp-esporte">
+            ${ESPORTES.map((e) => chip(e, state.esporte === e)).join("")}
+          </div>
+          <div class="imc-note">A ficha prioriza potência de pernas, agilidade e core, com manutenção de peito e costas — a base física comum à maioria dos esportes de campo/quadra.</div>
+        </div>
+      ` : ""}
+
+      ${state.objetivo && state.objetivo !== "esportivo" ? `
+        <div class="campo">
+          <div class="campo-label">Grupos musculares prioritários (escolha exatamente 2)</div>
+          <div class="chips" id="grp-prioridades">
+            ${PRIORIDADE_OPCOES.map((g) => chip(LABEL[g], state.prioridades.includes(g), COR[g])).join("")}
+          </div>
+        </div>
+      ` : ""}
+
+      <button class="btn-gerar ${ok ? "ok" : ""}" id="btn-gerar" ${ok ? "" : "disabled"}>Gerar ficha de treino</button>
+      ${!ok ? `<div class="hint-missing">Preencha idade, peso, altura, nível, objetivo — e o esporte ou as 2 prioridades musculares.</div>` : ""}
+    </div>
+  `;
+}
+
+function renderPlano() {
+  const ficha = montarFicha(state, state.seed);
+  const labels = DIA_LABELS[state.freq] || [];
+  const dia = ficha[Math.min(state.diaAtivo, ficha.length - 1)];
+  const objetivoLabel = (OBJETIVOS.find((o) => o.v === state.objetivo) || {}).l || "";
+  const perfilTags = [
+    `${state.idade} anos`, `${state.peso} kg`, `${state.altura} cm`, state.nivel, `${state.freq}x/semana`,
+    ...(state.limitacoes.length ? state.limitacoes : ["Sem limitações"]),
+  ];
+
+  return `
+    <div class="wrap wrap-plano">
+      <div class="header-plano">
+        <div>
+          <h1 class="ficha-title">${icon("dumbbell", 22, "#E2A83B")} Ficha de Treino</h1>
+          <p>${objetivoLabel}${state.esporte ? " — " + state.esporte : ""}</p>
+        </div>
+        <button class="btn-voltar" id="btn-voltar">${icon("back", 13)} Editar avaliação</button>
+      </div>
+
+      <div class="profile-strip">
+        ${perfilTags.map((t) => `<span>${t}</span>`).join("")}
+      </div>
+
+      <div class="actions-row">
+        <button class="btn-shuffle" id="btn-shuffle">${icon("shuffle", 14)} Gerar nova ficha</button>
+      </div>
+
+      <div class="day-tabs">
+        ${ficha.map((d, i) => `<button class="day-tab ${i === state.diaAtivo ? "ativo" : ""}" data-dia="${i}">${labels[i] || ("Dia " + (i + 1))}</button>`).join("")}
+      </div>
+
+      ${dia ? `
+        <div class="day-panel">
+          <h2 class="ficha-title">${dia.titulo}</h2>
+          <p class="day-sub">${dia.exercicios.length} exercícios · descanso conforme indicado entre séries</p>
+          <div>
+            ${dia.exercicios.map((ex, idx) => {
+              const key = `${state.diaAtivo}-${idx}-${ex.nome}`;
+              const done = !!state.feitos[key];
+              const cor = COR[ex.grupo];
+              return `
+                <div class="ex-row ${done ? "done" : ""}" data-key="${key}">
+                  <div class="ex-check">${done ? icon("check", 13, "#15181A") : ""}</div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                      <span class="ex-name">${ex.nome}</span>
+                      <span class="ex-tag" style="color:${cor};background:${cor}22;">${LABEL[ex.grupo]}</span>
+                    </div>
+                    <div class="ex-meta">${ex.series}x${ex.reps} · descanso ${ex.descanso} · ${ex.equip}</div>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      ` : ""}
+
+      <div class="footer-note">
+        ${icon("info", 14, "#6C9A8B")}
+        <p>Progrida a carga adicionando peso à mochila a cada 1–2 semanas, aumentando repetições, ou reduzindo o descanso entre séries. Toque em "Gerar nova ficha" para variar os exercícios dentro do mesmo plano.</p>
+      </div>
+    </div>
+  `;
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const active = document.activeElement;
+  const activeId = active && active.id;
+  const selStart = active && typeof active.selectionStart === "number" ? active.selectionStart : null;
+  const selEnd = active && typeof active.selectionEnd === "number" ? active.selectionEnd : null;
+
+  app.innerHTML = state.step === "form" ? renderForm() : renderPlano();
+  attachEvents();
+
+  if (activeId) {
+    const el = document.getElementById(activeId);
+    if (el) {
+      el.focus();
+      if (selStart !== null && el.setSelectionRange) {
+        try { el.setSelectionRange(selStart, selEnd); } catch (e) {}
+      }
+    }
+  }
+}
+
+function attachEvents() {
+  if (state.step === "form") {
+    document.getElementById("in-idade").oninput = (e) => { state.idade = e.target.value; render(); };
+    document.getElementById("in-peso").oninput = (e) => { state.peso = e.target.value; render(); };
+    document.getElementById("in-altura").oninput = (e) => { state.altura = e.target.value; render(); };
+
+    bindChips("grp-nivel", (label) => { state.nivel = label; render(); });
+    bindChips("grp-freq", (label) => { state.freq = Number(label.replace("x", "")); render(); });
+    bindChips("grp-limitacoes", (label) => {
+      if (label === "Nenhuma") state.limitacoes = state.limitacoes.includes("Nenhuma") ? [] : ["Nenhuma"];
+      else {
+        const w = state.limitacoes.filter((x) => x !== "Nenhuma");
+        state.limitacoes = w.includes(label) ? w.filter((x) => x !== label) : [...w, label];
+      }
+      render();
+    });
+    bindChips("grp-equip", (label) => {
+      state.equipamento = state.equipamento.includes(label)
+        ? state.equipamento.filter((x) => x !== label)
+        : [...state.equipamento, label];
+      render();
+    });
+    bindChips("grp-objetivo", (label) => {
+      const o = OBJETIVOS.find((o) => o.l === label);
+      state.objetivo = o ? o.v : "";
+      state.esporte = ""; state.prioridades = [];
+      render();
+    });
+    const grpEsporte = document.getElementById("grp-esporte");
+    if (grpEsporte) bindChips("grp-esporte", (label) => { state.esporte = label; render(); });
+    const grpPrioridades = document.getElementById("grp-prioridades");
+    if (grpPrioridades) bindChips("grp-prioridades", (label) => {
+      const g = Object.keys(LABEL).find((k) => LABEL[k] === label && PRIORIDADE_OPCOES.includes(k));
+      if (state.prioridades.includes(g)) state.prioridades = state.prioridades.filter((x) => x !== g);
+      else if (state.prioridades.length < 2) state.prioridades = [...state.prioridades, g];
+      render();
+    });
+
+    const btn = document.getElementById("btn-gerar");
+    if (btn) btn.onclick = () => {
+      if (!canGenerate()) return;
+      state.seed = 1; state.diaAtivo = 0; state.feitos = {};
+      state.step = "plano";
+      render();
+    };
+  } else {
+    document.getElementById("btn-voltar").onclick = () => { state.step = "form"; render(); };
+    document.getElementById("btn-shuffle").onclick = () => { state.seed += 1; state.feitos = {}; render(); };
+    document.querySelectorAll(".day-tab").forEach((el) => {
+      el.onclick = () => { state.diaAtivo = Number(el.dataset.dia); render(); };
+    });
+    document.querySelectorAll(".ex-row").forEach((el) => {
+      el.onclick = () => { const k = el.dataset.key; state.feitos[k] = !state.feitos[k]; render(); };
+    });
+  }
+}
+
+function bindChips(groupId, onSelect) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  group.querySelectorAll(".chip").forEach((el) => {
+    el.onclick = () => onSelect(el.dataset.label);
+  });
+}
+
+render();
+</script>
+</body>
+</html>
